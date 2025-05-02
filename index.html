@@ -2747,52 +2747,10 @@
                     </div>
                     
                     <!-- Featured Certificate 2 -->
-                    <div class="certification-card featured glass-card" data-category="ai-ml">
-                        <div class="certification-badge">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <div class="certification-content">
-                            <div class="certification-logo">
-                                <img src="images/certifications/aws.png" alt="AWS">
-                            </div>
-                            <div class="certification-details">
-                                <span class="certification-date">2023</span>
-                                <h3 class="certification-title">AWS Certified Machine Learning Specialty</h3>
-                                <p class="certification-issuer">Amazon Web Services</p>
-                                <p class="certification-description" style="display: none;">This certification validates expertise in machine learning and deep learning on the AWS platform.</p>
-                                <div class="certification-skills">
-                                    <span class="skill-tag">Machine Learning</span>
-                                    <span class="skill-tag">AWS</span>
-                                    <span class="skill-tag">SageMaker</span>
-                                </div>
-                                <a href="#" class="certification-verify"><i class="fas fa-certificate"></i> Verify</a>
-                            </div>
-                        </div>
-                    </div>
+                    
                     
                     <!-- Featured Certificate 3 -->
-                    <div class="certification-card featured glass-card" data-category="visualization">
-                        <div class="certification-badge">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <div class="certification-content">
-                            <div class="certification-logo">
-                                <img src="images/certifications/tableau.png" alt="Tableau">
-                            </div>
-                            <div class="certification-details">
-                                <span class="certification-date">2022</span>
-                                <h3 class="certification-title">Tableau Desktop Specialist</h3>
-                                <p class="certification-issuer">Tableau</p>
-                                <p class="certification-description" style="display: none;">This certification demonstrates foundational skills in Tableau Desktop and data visualization.</p>
-                                <div class="certification-skills">
-                                    <span class="skill-tag">Tableau</span>
-                                    <span class="skill-tag">Data Visualization</span>
-                                    <span class="skill-tag">Dashboard Design</span>
-                                </div>
-                                <a href="#" class="certification-verify"><i class="fas fa-certificate"></i> Verify</a>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
             
@@ -3397,42 +3355,67 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
     // Certifications sections 
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // DOM elements
-    const gridView = document.getElementById('grid-view');
-    const timelineView = document.getElementById('timeline-view');
-    const listView = document.getElementById('list-view');
-    const viewButtons = document.querySelectorAll('.view-btn');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    
-    const searchInput = document.getElementById('cert-search');
-    const loadMoreButton = document.getElementById('load-more-certs');
-    const viewLessButton = document.getElementById('view-less-certs');
-    const timelineYears = document.querySelectorAll('.timeline-year');
-    const timelineContent = document.querySelector('.timeline-content');
-    const certTableBody = document.querySelector('.cert-table tbody');
-    const certGridContainer = document.querySelector('.cert-grid-container');
 
-    const LIST_INITIAL_COUNT = 5; // Constant for initial list items
-    const INITIAL_TIMELINE_COUNT = 3; // Initial number of timeline items to show
-    const GRID_INITIAL_COUNT = 4; // Initial number of grid items to show
-    const loadIncrement = 4; // How many more to load each time
-    const timelineLoadIncrement = 4;
-    const listLoadIncrement = 5; // How many more list items to load each time
     
-    // Current state
-    let currentView = 'grid';
-    let currentFilter = 'all';
-    let currentYear = '2025';
-    let searchQuery = '';
-    let loadedCount = GRID_INITIAL_COUNT; // Initial number of certifications shown
-    let timelineLoadedCount = INITIAL_TIMELINE_COUNT;
-    let listLoadedCount = LIST_INITIAL_COUNT; // Initialize list count
+    document.addEventListener('DOMContentLoaded', function() {
+    // Constants and cache DOM elements (reduces DOM queries)
+    const GRID_INITIAL_COUNT = 4;
+    const INITIAL_TIMELINE_COUNT = 3;
+    const LIST_INITIAL_COUNT = 4;
+    const LOAD_INCREMENT = 3;
+    const TIMELINE_LOAD_INCREMENT = 4;
+    const LIST_LOAD_INCREMENT = 5;
     
-    // Certification data - In a real application, this could come from a backend API
+    // Cache DOM elements (improves performance by reducing DOM lookups)
+    const elements = {
+        views: {
+            grid: document.getElementById('grid-view'),
+            timeline: document.getElementById('timeline-view'),
+            list: document.getElementById('list-view')
+        },
+        buttons: {
+            view: document.querySelectorAll('.view-btn'),
+            filter: document.querySelectorAll('.filter-btn'),
+            loadMore: document.getElementById('load-more-certs'),
+            viewLess: document.getElementById('view-less-certs'),
+            timelineLoadMore: document.getElementById('timeline-load-more'),
+            timelineViewLess: document.getElementById('timeline-view-less'),
+            listLoadMore: document.getElementById('list-load-more'),
+            listViewLess: document.getElementById('list-view-less')
+        },
+        search: document.getElementById('cert-search'),
+        timelineYears: document.querySelectorAll('.timeline-year'),
+        timelineContent: document.querySelector('.timeline-content'),
+        certTableBody: document.querySelector('.cert-table tbody'),
+        certGridContainer: document.querySelector('.cert-grid-container'),
+        featuredContainer: document.querySelector('.featured-certs-container')
+    };
+    
+    // Current state (unified state management)
+    const state = {
+        view: 'grid',
+        filter: 'all',
+        year: '2025',
+        search: '',
+        counts: {
+            grid: GRID_INITIAL_COUNT,
+            timeline: INITIAL_TIMELINE_COUNT,
+            list: LIST_INITIAL_COUNT
+        }
+    };
+    
+    // Category mapping for display (helps with DRY principle)
+    const CATEGORIES = {
+        'data-analysis': 'Data Analysis',
+        'visualization': 'Visualization',
+        'programming': 'Programming',
+        'database': 'Database',
+        'ai-ml': 'AI & ML',
+        'cloud': 'Cloud'
+    };
+    
+    // Certification data with featured flag for better categorization
     const certifications = [
-        // These are the featured certificates that already appear in HTML
         {
             id: 1,
             title: "Microsoft Power BI Data Analyst",
@@ -3442,31 +3425,10 @@ document.addEventListener('DOMContentLoaded', function() {
             category: "data-analysis",
             skills: ["Power BI", "DAX", "Data Modeling"],
             description: "This certification demonstrates proficiency in using Power BI to analyze data and create reports.",
-            verifyLink: "https://learn.microsoft.com/en-us/credentials/certifications/power-bi-data-analyst-associate/"
+            verifyLink: "https://learn.microsoft.com/en-us/credentials/certifications/power-bi-data-analyst-associate/",
+            featured: true
         },
-        {
-            id: 2, 
-            title: "AWS Certified Machine Learning Specialty",
-            issuer: "Amazon Web Services",
-            date: "2023",
-            logo: "images/certifications/aws.png",
-            category: "ai-ml",
-            skills: ["Machine Learning", "AWS", "SageMaker"],
-            description: "This certification validates expertise in machine learning and deep learning on the AWS platform.",
-            verifyLink: "https://aws.amazon.com/certification/certified-machine-learning-specialty/"
-        },
-        {
-            id: 3,
-            title: "Tableau Desktop Specialist",
-            issuer: "Tableau",
-            date: "2022",
-            logo: "images/certifications/tableau.png",
-            category: "visualization",
-            skills: ["Tableau", "Data Visualization", "Dashboard Design"],
-            description: "This certification demonstrates foundational skills in Tableau Desktop and data visualization.",
-            verifyLink: "https://www.tableau.com/learn/certification/desktop-specialist"
-        },
-        // Regular grid certifications
+        // ID 2 and 3 removed as per request
         {
             id: 4,
             title: "Data Literacy and Introduction to Data Analysis using Excel",
@@ -3476,7 +3438,8 @@ document.addEventListener('DOMContentLoaded', function() {
             category: "data-analysis",
             skills: ["Excel", "Data Cleaning"],
             description: "Comprehensive training in data collection, transformation, analysis, and visualization using Excel.",
-            verifyLink: "https://app.dataquest.io/view_cert/5DLBKTL1A4LBVO9MFGVX"
+            verifyLink: "https://app.dataquest.io/view_cert/5DLBKTL1A4LBVO9MFGVX",
+            featured: false
         },
         {
             id: 5,
@@ -3487,9 +3450,9 @@ document.addEventListener('DOMContentLoaded', function() {
             category: "database",
             skills: ["SQL", "Database"],
             description: "Proficient in manipulating database using SQL.",
-            verifyLink: "https://app.dataquest.io/view_cert/SW2JFH2R4NT8ECK76PJY"
+            verifyLink: "https://app.dataquest.io/view_cert/SW2JFH2R4NT8ECK76PJY",
+            featured: false
         },
-        // More certifications for loading with "Load More" button
         {
             id: 6,
             title: "Advanced SQL Certificate",
@@ -3499,7 +3462,8 @@ document.addEventListener('DOMContentLoaded', function() {
             category: "database",
             skills: ["SQL", "Database Design", "Query Optimization"],
             description: "Advanced proficiency in complex SQL queries and database management.",
-            verifyLink: "https://www.hackerrank.com/certificates/008e6642bcb0"
+            verifyLink: "https://www.hackerrank.com/certificates/008e6642bcb0",
+            featured: false
         },
         {
             id: 7,
@@ -3510,7 +3474,8 @@ document.addEventListener('DOMContentLoaded', function() {
             category: "database",
             skills: ["PostgreSQL", "Database Design", "SQL Queries", "Data Modeling"],
             description: "Comprehensive certification in relational database management, covering database design principles, SQL query optimization, and practical implementation of database systems.",
-            verifyLink: "https://www.freecodecamp.org/certification/anhminh120802/relational-database-v8"
+            verifyLink: "https://www.freecodecamp.org/certification/anhminh120802/relational-database-v8",
+            featured: false
         },
         {
             id: 8,
@@ -3521,402 +3486,312 @@ document.addEventListener('DOMContentLoaded', function() {
             category: "data-analysis",
             skills: ["Python", "Pandas", "NumPy", "Data Processing"],
             description: "Foundational certification in Python programming for data analysis, covering essential concepts including data structures, libraries like Pandas and NumPy, and basic data manipulation techniques.",
-            verifyLink: "https://app.dataquest.io/view_cert/IT0EINYYAR9OYXYQTSZT"
+            verifyLink: "https://app.dataquest.io/view_cert/IT0EINYYAR9OYXYQTSZT",
+            featured: false
         }
     ];
     
-    // View switching
-    viewButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const view = button.getAttribute('data-view');
-            switchView(view);
-        });
-    });
-    
-    function switchView(view) {
-        // Remove active class from all view buttons
-        viewButtons.forEach(btn => btn.classList.remove('active'));
-        
-        // Add active class to clicked button
-        document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('active');
-        
-        // Hide all views
-        gridView.style.display = 'none';
-        timelineView.style.display = 'none';
-        listView.style.display = 'none';
-        
-        // Show selected view
-        if (view === 'grid') {
-            gridView.style.display = 'block';
-            loadedCount = GRID_INITIAL_COUNT; // Reset to initial count
-            renderGridView();
-        } else if (view === 'timeline') {
-            timelineView.style.display = 'block';
-            timelineLoadedCount = INITIAL_TIMELINE_COUNT;
-            renderTimelineYears();
-            renderTimelineView(currentYear);
-        } else if (view === 'list') {
-            listView.style.display = 'block';
-            listLoadedCount = LIST_INITIAL_COUNT; // Reset to initial count
-            renderListView();
-        }
-        
-        currentView = view;
-    }
-    
-    // Category filtering
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const filter = button.getAttribute('data-filter');
-            applyFilter(filter);
-        });
-    });
-    
-    // Helper function to get filtered certifications
-    function getFilteredCertifications() {
-        return certifications.filter(cert => 
-            (currentFilter === 'all' || cert.category === currentFilter) &&
-            (searchQuery === '' || 
-             cert.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-             cert.issuer.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
-    }
-    
-    function applyFilters(certs) {
-        return certs.filter(cert => {
-            // Category filter
-            const matchesCategory = currentFilter === 'all' || cert.category === currentFilter;
-            
-            // Search filter
-            const matchesSearch = searchQuery === '' || 
-                cert.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                cert.issuer.toLowerCase().includes(searchQuery.toLowerCase());
+    // Utility functions (pure functions for better testability)
+    const utils = {
+        // Filter certifications based on current state
+        filterCertifications: (certs = certifications) => {
+            return certs.filter(cert => {
+                const matchesCategory = state.filter === 'all' || cert.category === state.filter;
+                const matchesSearch = state.search === '' || 
+                    cert.title.toLowerCase().includes(state.search) || 
+                    cert.issuer.toLowerCase().includes(state.search);
+                const matchesYear = state.view !== 'timeline' || cert.date === state.year;
                 
-            // Year filter (for timeline view)
-            const matchesYear = currentView !== 'timeline' || cert.date === currentYear;
+                return matchesCategory && matchesSearch && matchesYear;
+            });
+        },
+        
+        // Get unique years from certifications
+        getUniqueYears: () => {
+            return [...new Set(certifications.map(cert => cert.date))]
+                .sort((a, b) => b - a); // Sort descending
+        },
+        
+        // Toggle button visibility
+        toggleButtonVisibility: (button, isVisible) => {
+            button.style.display = isVisible ? 'inline-block' : 'none';
+        },
+        
+        // Update load more/less buttons visibility
+        updateLoadButtons: (totalItems, loadedItems, initialCount, loadMoreBtn, viewLessBtn) => {
+            utils.toggleButtonVisibility(loadMoreBtn, totalItems > loadedItems);
+            utils.toggleButtonVisibility(viewLessBtn, loadedItems > initialCount && totalItems <= loadedItems);
+        },
+        
+        // Get category display name
+        getCategoryName: (category) => CATEGORIES[category] || category
+    };
+    
+    // View renderers
+    const renderers = {
+        grid: () => {
+            // Get featured and regular certifications
+            const featuredCerts = utils.filterCertifications(certifications.filter(cert => cert.featured));
+            const regularCerts = utils.filterCertifications(certifications.filter(cert => !cert.featured));
             
-            return matchesCategory && matchesSearch && matchesYear;
-        });
-    }
-    
-    function applyFilter(filter) {
-        currentFilter = filter;
-        
-        // Update active filter button
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
-        
-        // Apply filter based on current view
-        if (currentView === 'grid') {
-            renderGridView();
-        } else if (currentView === 'timeline') {
-            renderTimelineView(currentYear);
-        } else if (currentView === 'list') {
-            renderListView();
-        }
-    }
-    
-    // Search functionality
-    searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value.toLowerCase().trim();
-        
-        // Reset counts for all views
-        loadedCount = GRID_INITIAL_COUNT;
-        timelineLoadedCount = INITIAL_TIMELINE_COUNT;
-        listLoadedCount = LIST_INITIAL_COUNT;
-        
-        // Apply search based on current view
-        if (currentView === 'grid') {
-            renderGridView();
-        } else if (currentView === 'timeline') {
-            renderTimelineView(currentYear);
-        } else if (currentView === 'list') {
-            renderListView();
-        }
-    });
-    
-    // Timeline year selection
-    // Get unique years and render timeline years
-    function getUniqueYears() {
-        const years = [...new Set(certifications.map(cert => cert.date))];
-        return years.sort((a, b) => b - a); // Sort years in descending order
-    }
-    
-    function renderTimelineYears() {
-        const timelineYearsContainer = document.querySelector('.timeline-years');
-        const years = getUniqueYears();
-        
-        timelineYearsContainer.innerHTML = ''; // Clear existing years
-        
-        years.forEach(year => {
-            const yearBtn = document.createElement('div');
-            yearBtn.className = `timeline-year${year === currentYear ? ' active' : ''}`;
-            yearBtn.textContent = year;
-            
-            yearBtn.addEventListener('click', () => {
-                // Update active state
-                document.querySelectorAll('.timeline-year').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                yearBtn.classList.add('active');
-                
-                // Update current year and render timeline
-                currentYear = year;
-                renderTimelineView(year);
+            // Update featured certification visibility (if they exist in the DOM)
+            document.querySelectorAll('.certification-card.featured').forEach((card, index) => {
+                card.style.display = index < featuredCerts.length ? 'block' : 'none';
             });
             
-            timelineYearsContainer.appendChild(yearBtn);
-        });
-    }
-    
-    // Render grid view
-    function renderGridView() {
-        const featuredContainer = document.querySelector('.featured-certs-container');
-        const gridContainer = document.querySelector('.cert-grid-container');
-        
-        // First handle featured certifications
-        const featuredCerts = certifications.slice(0, 3); // First 3 certs are featured
-        const regularCerts = certifications.slice(3); // Rest are regular grid items
-        
-        // Filter featured certs based on current filter and search
-        const filteredFeatured = featuredCerts.filter(cert => {
-            const matchesCategory = currentFilter === 'all' || cert.category === currentFilter;
-            const matchesSearch = searchQuery === '' || 
-                cert.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                cert.issuer.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-        
-        // Update featured certification visibility
-        document.querySelectorAll('.certification-card.featured').forEach((card, index) => {
-            if (index < filteredFeatured.length) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        // Filter regular certifications
-        const filteredRegular = regularCerts.filter(cert => {
-            const matchesCategory = currentFilter === 'all' || cert.category === currentFilter;
-            const matchesSearch = searchQuery === '' || 
-                cert.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                cert.issuer.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-        
-        // Clear and re-render grid container
-        gridContainer.innerHTML = '';
-        
-        // Show only up to loadedCount regular certifications
-        const certsToShow = filteredRegular.slice(0, loadedCount);
-        
-        certsToShow.forEach(cert => {
-            const certItem = document.createElement('div');
-            certItem.className = 'cert-grid-item glass-card';
-            certItem.setAttribute('data-category', cert.category);
-            certItem.innerHTML = `
-                <div class="cert-grid-content">
-                    <div class="cert-grid-logo">
-                        <img src="${cert.logo}" alt="${cert.issuer}">
-                    </div>
-                    <h4 class="cert-grid-title">${cert.title}</h4>
-                    <div class="cert-grid-meta">
-                        <span class="cert-grid-issuer">${cert.issuer}</span>
-                        <span class="cert-grid-date">${cert.date}</span>
-                    </div>
-                    <div class="cert-grid-skills">
-                        ${cert.skills.slice(0, 2).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
-                    </div>
-                </div>
-                <div class="cert-grid-hover">
-                    <p class="cert-grid-description">${cert.description}</p>
-                    <a href="${cert.verifyLink}" class="cert-grid-verify" target="_blank"><i class="fas fa-certificate"></i> Verify</a>
-                </div>
-            `;
-            gridContainer.appendChild(certItem);
-        });
-        
-        // Update button visibility
-        if (filteredRegular.length > loadedCount) {
-            loadMoreButton.style.display = 'inline-block';
-            viewLessButton.style.display = 'none';
-        } else if (loadedCount > GRID_INITIAL_COUNT) {
-            loadMoreButton.style.display = 'none';
-            viewLessButton.style.display = 'inline-block';
-        } else {
-            loadMoreButton.style.display = 'none';
-            viewLessButton.style.display = 'none';
-        }
-    }
-    
-    // Render timeline view for a specific year
-    function renderTimelineView(year) {
-        // Clear previous timeline items
-        timelineContent.innerHTML = '';
-        
-        // Filter certifications by year and current filter
-        const filteredCerts = certifications.filter(cert => {
-            return cert.date === year && 
-                (currentFilter === 'all' || cert.category === currentFilter) &&
-                (searchQuery === '' || 
-                 cert.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                 cert.issuer.toLowerCase().includes(searchQuery.toLowerCase()));
-        });
-        
-        if (filteredCerts.length === 0) {
-            // Show placeholder if no certifications found
-            timelineContent.innerHTML = `
-                <div class="timeline-placeholder">
-                    <i class="fas fa-clock"></i>
-                    <p>No certifications found for ${year} with current filters</p>
-                </div>
-            `;
-            document.getElementById('timeline-load-more').style.display = 'none';
-            document.getElementById('timeline-view-less').style.display = 'none';
-            return;
-        }
-        
-        // Show only the first 'timelineLoadedCount' items
-        const certsToShow = filteredCerts.slice(0, timelineLoadedCount);
-        
-        // Render each certification in timeline format
-        certsToShow.forEach((cert, index) => {
-            const timelineItem = document.createElement('div');
-            timelineItem.className = 'timeline-item';
-            timelineItem.innerHTML = `
-                <div class="timeline-item-header">
-                    <div class="timeline-item-logo">
-                        <img src="${cert.logo}" alt="${cert.issuer}">
-                    </div>
-                    <div class="timeline-item-title">
-                        <h4>${cert.title}</h4>
-                        <p>${cert.issuer}</p>
-                    </div>
-                </div>
-                <div class="timeline-item-body">
-                    <p>${cert.description}</p>
-                    <div class="timeline-item-skills">
-                        ${cert.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
-                    </div>
-                </div>
-                <a href="${cert.verifyLink}" class="certification-verify" target="_blank"><i class="fas fa-certificate"></i> Verify</a>
-            `;
-            timelineContent.appendChild(timelineItem);
-        });
-        
-        // Update Load More and View Less buttons visibility
-        if (filteredCerts.length > timelineLoadedCount) {
-            document.getElementById('timeline-load-more').style.display = 'inline-block';
-            document.getElementById('timeline-view-less').style.display = 'none';
-        } else if (timelineLoadedCount > INITIAL_TIMELINE_COUNT) {
-            document.getElementById('timeline-load-more').style.display = 'none';
-            document.getElementById('timeline-view-less').style.display = 'inline-block';
-        } else {
-            document.getElementById('timeline-load-more').style.display = 'none';
-            document.getElementById('timeline-view-less').style.display = 'none';
-        }
-    }
-    
-    // Render list view
-    function renderListView() {
-        // Clear previous list items
-        certTableBody.innerHTML = '';
-        
-        // Filter certifications based on current filter and search
-        const filteredCerts = certifications.filter(cert => {
-            return (currentFilter === 'all' || cert.category === currentFilter) &&
-                (searchQuery === '' || 
-                 cert.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                 cert.issuer.toLowerCase().includes(searchQuery.toLowerCase()));
-        });
-        
-        // Show only the first 'listLoadedCount' items
-        const certsToShow = filteredCerts.slice(0, listLoadedCount);
-        
-        // Render each certification as a table row
-        certsToShow.forEach(cert => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>
-                    <div class="table-cert-info">
-                        <div class="table-cert-logo">
-                            <img src="${cert.logo}" alt="${cert.issuer}" width="30">
+            // Clear and re-render grid container
+            elements.certGridContainer.innerHTML = '';
+            
+            // Show only up to loadedCount regular certifications
+            const certsToShow = regularCerts.slice(0, state.counts.grid);
+            
+            // Use document fragment for better performance
+            const fragment = document.createDocumentFragment();
+            
+            certsToShow.forEach(cert => {
+                const certItem = document.createElement('div');
+                certItem.className = 'cert-grid-item glass-card';
+                certItem.setAttribute('data-category', cert.category);
+                certItem.innerHTML = `
+                    <div class="cert-grid-content">
+                        <div class="cert-grid-logo">
+                            <img src="${cert.logo}" alt="${cert.issuer}">
                         </div>
-                        <div class="table-cert-title">${cert.title}</div>
+                        <h4 class="cert-grid-title">${cert.title}</h4>
+                        <div class="cert-grid-meta">
+                            <span class="cert-grid-issuer">${cert.issuer}</span>
+                            <span class="cert-grid-date">${cert.date}</span>
+                        </div>
+                        <div class="cert-grid-skills">
+                            ${cert.skills.slice(0, 2).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                        </div>
                     </div>
-                </td>
-                <td>${cert.issuer}</td>
-                <td>${cert.date}</td>
-                <td>${getCategoryName(cert.category)}</td>
-                <td>
-                    <a href="${cert.verifyLink}" class="table-cert-verify" target="_blank"><i class="fas fa-certificate"></i> Verify</a>
-                </td>
-            `;
-            certTableBody.appendChild(row);
-        });
+                    <div class="cert-grid-hover">
+                        <p class="cert-grid-description">${cert.description}</p>
+                        <a href="${cert.verifyLink}" class="cert-grid-verify" target="_blank"><i class="fas fa-certificate"></i> Verify</a>
+                    </div>
+                `;
+                fragment.appendChild(certItem);
+            });
+            
+            elements.certGridContainer.appendChild(fragment);
+            
+            // Update button visibility
+            utils.updateLoadButtons(
+                regularCerts.length, 
+                state.counts.grid, 
+                GRID_INITIAL_COUNT,
+                elements.buttons.loadMore, 
+                elements.buttons.viewLess
+            );
+        },
         
-        // Update button visibility
-        if (filteredCerts.length > listLoadedCount) {
-            document.getElementById('list-load-more').style.display = 'inline-block';
-            document.getElementById('list-view-less').style.display = 'none';
-        } else if (listLoadedCount > LIST_INITIAL_COUNT) {
-            document.getElementById('list-load-more').style.display = 'none';
-            document.getElementById('list-view-less').style.display = 'inline-block';
-        } else {
-            document.getElementById('list-load-more').style.display = 'none';
-            document.getElementById('list-view-less').style.display = 'none';
+        timeline: () => {
+            // Clear previous timeline items
+            elements.timelineContent.innerHTML = '';
+            
+            // Filter certifications by year and current filter
+            const filteredCerts = utils.filterCertifications(
+                certifications.filter(cert => cert.date === state.year)
+            );
+            
+            if (filteredCerts.length === 0) {
+                // Show placeholder if no certifications found
+                elements.timelineContent.innerHTML = `
+                    <div class="timeline-placeholder">
+                        <i class="fas fa-clock"></i>
+                        <p>No certifications found for ${state.year} with current filters</p>
+                    </div>
+                `;
+                utils.toggleButtonVisibility(elements.buttons.timelineLoadMore, false);
+                utils.toggleButtonVisibility(elements.buttons.timelineViewLess, false);
+                return;
+            }
+            
+            // Show only the first 'timelineLoadedCount' items
+            const certsToShow = filteredCerts.slice(0, state.counts.timeline);
+            
+            // Use document fragment for better performance
+            const fragment = document.createDocumentFragment();
+            
+            // Render each certification in timeline format
+            certsToShow.forEach(cert => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.innerHTML = `
+                    <div class="timeline-item-header">
+                        <div class="timeline-item-logo">
+                            <img src="${cert.logo}" alt="${cert.issuer}">
+                        </div>
+                        <div class="timeline-item-title">
+                            <h4>${cert.title}</h4>
+                            <p>${cert.issuer}</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item-body">
+                        <p>${cert.description}</p>
+                        <div class="timeline-item-skills">
+                            ${cert.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                        </div>
+                    </div>
+                    <a href="${cert.verifyLink}" class="certification-verify" target="_blank"><i class="fas fa-certificate"></i> Verify</a>
+                `;
+                fragment.appendChild(timelineItem);
+            });
+            
+            elements.timelineContent.appendChild(fragment);
+            
+            // Update Load More and View Less buttons visibility
+            utils.updateLoadButtons(
+                filteredCerts.length, 
+                state.counts.timeline, 
+                INITIAL_TIMELINE_COUNT,
+                elements.buttons.timelineLoadMore, 
+                elements.buttons.timelineViewLess
+            );
+        },
+        
+        list: () => {
+            // Clear previous list items
+            elements.certTableBody.innerHTML = '';
+            
+            // Filter certifications based on current filter and search
+            const filteredCerts = utils.filterCertifications();
+            
+            // Show only the first 'listLoadedCount' items
+            const certsToShow = filteredCerts.slice(0, state.counts.list);
+            
+            // Use document fragment for better performance
+            const fragment = document.createDocumentFragment();
+            
+            // Render each certification as a table row
+            certsToShow.forEach(cert => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="table-cert-info">
+                            <div class="table-cert-logo">
+                                <img src="${cert.logo}" alt="${cert.issuer}" width="30">
+                            </div>
+                            <div class="table-cert-title">${cert.title}</div>
+                        </div>
+                    </td>
+                    <td>${cert.issuer}</td>
+                    <td>${cert.date}</td>
+                    <td>${utils.getCategoryName(cert.category)}</td>
+                    <td>
+                        <a href="${cert.verifyLink}" class="table-cert-verify" target="_blank"><i class="fas fa-certificate"></i> Verify</a>
+                    </td>
+                `;
+                fragment.appendChild(row);
+            });
+            
+            elements.certTableBody.appendChild(fragment);
+            
+            // Update button visibility
+            utils.updateLoadButtons(
+                filteredCerts.length, 
+                state.counts.list, 
+                LIST_INITIAL_COUNT, 
+                elements.buttons.listLoadMore, 
+                elements.buttons.listViewLess
+            );
+        },
+        
+        timelineYears: () => {
+            const timelineYearsContainer = document.querySelector('.timeline-years');
+            const years = utils.getUniqueYears();
+            
+            timelineYearsContainer.innerHTML = ''; // Clear existing years
+            
+            // Use document fragment for better performance
+            const fragment = document.createDocumentFragment();
+            
+            years.forEach(year => {
+                const yearBtn = document.createElement('div');
+                yearBtn.className = `timeline-year${year === state.year ? ' active' : ''}`;
+                yearBtn.textContent = year;
+                
+                yearBtn.addEventListener('click', () => {
+                    // Update active state
+                    document.querySelectorAll('.timeline-year').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    yearBtn.classList.add('active');
+                    
+                    // Update current year and render timeline
+                    state.year = year;
+                    renderers.timeline();
+                });
+                
+                fragment.appendChild(yearBtn);
+            });
+            
+            timelineYearsContainer.appendChild(fragment);
         }
-    }
+    };
     
-    // Helper function to get readable category name
-    function getCategoryName(category) {
-        const categories = {
-            'data-analysis': 'Data Analysis',
-            'visualization': 'Visualization',
-            'programming': 'Programming',
-            'database': 'Database',
-            'ai-ml': 'AI & ML',
-            'cloud': 'Cloud'
-        };
-        return categories[category] || category;
-    }
-    
-    // Load more functionality for grid view
-    loadMoreButton.addEventListener('click', () => {
-        loadedCount += loadIncrement;
-        renderGridView();
-    });
-    
-    // View less functionality for grid view
-    viewLessButton.addEventListener('click', () => {
-        loadedCount = GRID_INITIAL_COUNT;
-        renderGridView();
-    });
-    
-    // Load more functionality for list view
-    document.getElementById('list-load-more').addEventListener('click', () => {
-        listLoadedCount += listLoadIncrement;
-        renderListView();
-    });
-    
-    // View less functionality for list view
-    document.getElementById('list-view-less').addEventListener('click', () => {
-        listLoadedCount = LIST_INITIAL_COUNT;
-        renderListView();
-    });
-    
-    // Load more functionality for timeline view
-    document.getElementById('timeline-load-more').addEventListener('click', () => {
-        timelineLoadedCount += timelineLoadIncrement;
-        renderTimelineView(currentYear);
-    });
-    
-    // View less functionality for timeline view
-    document.getElementById('timeline-view-less').addEventListener('click', () => {
-        timelineLoadedCount = INITIAL_TIMELINE_COUNT;
-        renderTimelineView(currentYear);
-    });
+    // Event handlers
+    const handlers = {
+        switchView: (view) => {
+            // Update active view button
+            elements.buttons.view.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('active');
+            
+            // Hide all views
+            Object.values(elements.views).forEach(el => el.style.display = 'none');
+            
+            // Show selected view
+            elements.views[view].style.display = 'block';
+            
+            // Reset counts for the selected view
+            if (view === 'grid') {
+                state.counts.grid = GRID_INITIAL_COUNT;
+                renderers.grid();
+            } else if (view === 'timeline') {
+                state.counts.timeline = INITIAL_TIMELINE_COUNT;
+                renderers.timelineYears();
+                renderers.timeline();
+            } else if (view === 'list') {
+                state.counts.list = LIST_INITIAL_COUNT;
+                renderers.list();
+            }
+            
+            state.view = view;
+        },
+        
+        applyFilter: (filter) => {
+            state.filter = filter;
+            
+            // Update active filter button
+            elements.buttons.filter.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
+            
+            // Reset counts for current view
+            if (state.view === 'grid') {
+                state.counts.grid = GRID_INITIAL_COUNT;
+                renderers.grid();
+            } else if (state.view === 'timeline') {
+                state.counts.timeline = INITIAL_TIMELINE_COUNT;
+                renderers.timeline();
+            } else if (state.view === 'list') {
+                state.counts.list = LIST_INITIAL_COUNT;
+                renderers.list();
+            }
+        },
+        
+        search: (query) => {
+            state.search = query.toLowerCase().trim();
+            
+            // Reset counts for all views
+            state.counts.grid = GRID_INITIAL_COUNT;
+            state.counts.timeline = INITIAL_TIMELINE_COUNT;
+            state.counts.list = LIST_INITIAL_COUNT;
+            
+            // Apply search based on current view
+            renderers[state.view]();
+        }
+    };
     
     // Initialize animations for certificate cards when they come into view
     function initializeAnimations() {
@@ -3978,9 +3853,70 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('.year-count').textContent = uniqueYears;
     }
     
+    // Set up event listeners
+    function setupEventListeners() {
+        // View switching
+        elements.buttons.view.forEach(button => {
+            button.addEventListener('click', () => {
+                const view = button.getAttribute('data-view');
+                handlers.switchView(view);
+            });
+        });
+        
+        // Category filtering
+        elements.buttons.filter.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.getAttribute('data-filter');
+                handlers.applyFilter(filter);
+            });
+        });
+        
+        // Search functionality
+        elements.search.addEventListener('input', (e) => {
+            handlers.search(e.target.value);
+        });
+        
+        // Load more functionality for grid view
+        elements.buttons.loadMore.addEventListener('click', () => {
+            state.counts.grid += LOAD_INCREMENT;
+            renderers.grid();
+        });
+        
+        // View less functionality for grid view
+        elements.buttons.viewLess.addEventListener('click', () => {
+            state.counts.grid = GRID_INITIAL_COUNT;
+            renderers.grid();
+        });
+        
+        // Load more functionality for list view
+        elements.buttons.listLoadMore.addEventListener('click', () => {
+            state.counts.list += LIST_LOAD_INCREMENT;
+            renderers.list();
+        });
+        
+        // View less functionality for list view
+        elements.buttons.listViewLess.addEventListener('click', () => {
+            state.counts.list = LIST_INITIAL_COUNT;
+            renderers.list();
+        });
+        
+        // Load more functionality for timeline view
+        elements.buttons.timelineLoadMore.addEventListener('click', () => {
+            state.counts.timeline += TIMELINE_LOAD_INCREMENT;
+            renderers.timeline();
+        });
+        
+        // View less functionality for timeline view
+        elements.buttons.timelineViewLess.addEventListener('click', () => {
+            state.counts.timeline = INITIAL_TIMELINE_COUNT;
+            renderers.timeline();
+        });
+    }
+    
     // Initialize all functionality
     function initialize() {
-        renderGridView(); // Render initial grid view
+        setupEventListeners();
+        renderers.grid(); // Render initial grid view
         updateStatistics(); // Update statistics count
         initializeAnimations(); // Setup animations
         initializeCounters(); // Setup counters
